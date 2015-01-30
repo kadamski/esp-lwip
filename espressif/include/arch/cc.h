@@ -84,8 +84,8 @@ typedef unsigned long   mem_ptr_t;
 #endif
 
 #define SYS_ARCH_DECL_PROTECT(x)
-#define SYS_ARCH_PROTECT(x)
-#define SYS_ARCH_UNPROTECT(x)
+#define SYS_ARCH_PROTECT(x) os_intr_lock()
+#define SYS_ARCH_UNPROTECT(x) os_intr_unlock()
 
 #define LWIP_PLATFORM_BYTESWAP 1
 #define LWIP_PLATFORM_HTONS(_n)  ((u16_t)((((_n) & 0xff) << 8) | (((_n) >> 8) & 0xff)))
