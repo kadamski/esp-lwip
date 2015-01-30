@@ -77,6 +77,12 @@
 #include "lwip/inet_chksum.h"
 #endif
 
+#ifdef EBUF_LWIP
+#include "pp/esf_buf.h"
+#else
+#define EP_OFFSET 0
+#endif /* ESF_LWIP */
+
 #include <string.h>
 
 #define SIZEOF_STRUCT_PBUF        LWIP_MEM_ALIGN_SIZE(sizeof(struct pbuf))
@@ -232,6 +238,29 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     LWIP_ASSERT("pbuf_alloc: bad pbuf layer", 0);
     return NULL;
   }
+#ifdef PBUF_RSV_FOR_WLAN
+    /*
+     * 1. LINK_HLEN 14Byte will be remove in WLAN layer
+     * 2. IEEE80211_HDR_MAX_LEN needs 40 bytes.
+     * 3. encryption needs exra 4 bytes ahead of actual data payload, and require
+     *     DAddr and SAddr to be 4-byte aligned.
+     * 4. TRANSPORT and IP are all 20, 4 bytes aligned, nice...
+     * 5. LCC add 6 bytes more, We don't consider WAPI yet...
+     * 6. define LWIP_MEM_ALIGN to be 4 Byte aligned, pbuf struct is 16B, Only thing may be
+     *     matter is ether_hdr is not 4B aligned.
+     *
+     * So, we need extra (40 + 4 - 14) = 30 and it's happen to be 4-Byte aligned
+     *
+     *    1. lwip
+     *         | empty 30B    | eth_hdr (14B)  | payload ...|
+     *              total: 44B ahead payload
+     *    2. net80211
+     *         | max 80211 hdr, 32B | ccmp/tkip iv (8B) | sec rsv(4B) | payload ...|
+     *              total: 40B ahead sec_rsv and 44B ahead payload
+     *
+     */
+    offset += EP_OFFSET; //remove LINK hdr in wlan
+#endif /* PBUF_RSV_FOR_WLAN */
 
   switch (type) {
   case PBUF_POOL:
@@ -318,6 +347,9 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     LWIP_ASSERT("pbuf_alloc: pbuf->payload properly aligned",
            ((mem_ptr_t)p->payload % MEM_ALIGNMENT) == 0);
     break;
+#ifdef EBUF_LWIP
+  case PBUF_ESF_RX:
+#endif /* ESF_LWIP */
   /* pbuf references existing (non-volatile static constant) ROM payload? */
   case PBUF_ROM:
   /* pbuf references existing (externally allocated) RAM payload? */
@@ -546,7 +578,11 @@ pbuf_header(struct pbuf *p, s16_t header_size_increment)
     /* set new payload pointer */
     p->payload = (u8_t *)p->payload - header_size_increment;
     /* boundary check fails? */
-    if ((u8_t *)p->payload < (u8_t *)p + SIZEOF_STRUCT_PBUF) {
+    if ((u8_t *)p->payload < (u8_t *)p + SIZEOF_STRUCT_PBUF
+#ifdef PBUF_RSV_FOR_WLAN
+        + EP_OFFSET
+#endif
+      ) {
       LWIP_DEBUGF( PBUF_DEBUG | LWIP_DBG_LEVEL_SERIOUS,
         ("pbuf_header: failed as %p < %p (not enough space for new header size)\n",
         (void *)p->payload, (void *)(p + 1)));
@@ -634,7 +670,11 @@ pbuf_free(struct pbuf *p)
 
   LWIP_ASSERT("pbuf_free: sane type",
     p->type == PBUF_RAM || p->type == PBUF_ROM ||
-    p->type == PBUF_REF || p->type == PBUF_POOL);
+    p->type == PBUF_REF || p->type == PBUF_POOL
+#ifdef EBUF_LWIP
+    || p->type == PBUF_ESF_RX
+#endif  //EBUF_LWIP
+    );
 
   count = 0;
   /* de-allocate all consecutive pbufs from the head of the chain that
@@ -670,7 +710,14 @@ pbuf_free(struct pbuf *p)
         if (type == PBUF_POOL) {
           memp_free(MEMP_PBUF_POOL, p);
         /* is this a ROM or RAM referencing pbuf? */
-        } else if (type == PBUF_ROM || type == PBUF_REF) {
+        } else if (type == PBUF_ROM || type == PBUF_REF
+#ifdef EBUF_LWIP
+            || type == PBUF_ESF_RX
+#endif
+          ) {
+#ifdef EBUF_LWIP
+          system_pp_recycle_rx_pkt(p->eb);
+#endif
           memp_free(MEMP_PBUF, p);
         /* type == PBUF_RAM */
         } else {
