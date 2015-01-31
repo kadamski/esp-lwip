@@ -1279,7 +1279,16 @@ tcp_alloc(u8_t prio)
 {
   struct tcp_pcb *pcb;
   u32_t iss;
-  
+
+#if LWIP_ESP
+  int i;
+  for (i = 0; i<3; i++) {
+    if (system_get_free_heap_size()<ESP_TIMEWAIT_THRESHOLD) {
+      tcp_kill_timewait();
+    }
+  }
+#endif
+
   pcb = (struct tcp_pcb *)memp_malloc(MEMP_TCP_PCB);
   if (pcb == NULL) {
     /* Try killing oldest connection in TIME-WAIT. */
