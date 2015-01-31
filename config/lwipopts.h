@@ -53,6 +53,8 @@ static inline uint32_t sys_now(void)
 #define LWIP_HAVE_LOOPIF                    1
 
 // Tweakable:
+#define ESP_TIMEWAIT_THRESHOLD              10000
+
 #define TCP_TMR_INTERVAL                    125
 #define TCP_KEEPIDLE_DEFAULT                3000
 #define TCP_KEEPINTVL_DEFAULT               1000
