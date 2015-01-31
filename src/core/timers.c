@@ -147,12 +147,18 @@ arp_timer(void *arg)
  *
  * @param arg unused argument
  */
+#ifdef LWIP_ESP
+extern void dhcps_coarse_tmr(void);
+#endif
 static void
 dhcp_timer_coarse(void *arg)
 {
   LWIP_UNUSED_ARG(arg);
   LWIP_DEBUGF(TIMERS_DEBUG, ("tcpip: dhcp_coarse_tmr()\n"));
   dhcp_coarse_tmr();
+#ifdef LWIP_ESP
+  dhcps_coarse_tmr();
+#endif
   sys_timeout(DHCP_COARSE_TIMER_MSECS, dhcp_timer_coarse, NULL);
 }
 
