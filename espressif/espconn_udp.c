@@ -267,6 +267,7 @@ espconn_udp_server(struct espconn *pespconn)
  * 				  multicast_ip -- multicast ip given by user
  * Returns      : none
 *******************************************************************************/
+#if LWIP_IGMP
 sint8 ICACHE_FLASH_ATTR
 espconn_igmp_leave(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
 {
@@ -277,6 +278,7 @@ espconn_igmp_leave(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
 
     return ESPCONN_OK;
 }
+#endif
 
 /******************************************************************************
  * FunctionName : espconn_igmp_join
@@ -285,6 +287,7 @@ espconn_igmp_leave(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
  * 				  multicast_ip -- multicast ip given by user
  * Returns      : none
 *******************************************************************************/
+#if LWIP_IGMP
 sint8 ICACHE_FLASH_ATTR
 espconn_igmp_join(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
 {
@@ -296,3 +299,4 @@ espconn_igmp_join(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
     /* join to any IP address at the port  */
     return ESPCONN_OK;
 }
+#endif
