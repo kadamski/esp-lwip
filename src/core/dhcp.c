@@ -1006,6 +1006,9 @@ dhcp_bind(struct netif *netif)
   netif_set_netmask(netif, &sn_mask);
   LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("dhcp_bind(): GW: 0x%08"X32_F"\n",
     ip4_addr_get_u32(&gw_addr)));
+
+  system_station_got_ip_set(&dhcp->offered_ip_addr, &sn_mask, &gw_addr);
+
   netif_set_gw(netif, &gw_addr);
   /* bring the interface up */
   netif_set_up(netif);
