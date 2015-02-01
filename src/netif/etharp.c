@@ -802,9 +802,29 @@ etharp_arp_input(struct netif *netif, struct eth_addr *ethaddr, struct pbuf *p)
 
       /* hwtype, hwaddr_len, proto, protolen and the type in the ethernet header
          are already correct, we tested that before */
+#ifdef EBUF_LWIP
+{
+struct pbuf *q;
+      /*
+       *   don't do flip-flop here... do a copy here.
+       *    otherwise, we need to handle existing pbuf->eb in ieee80211_output.c
+       */
 
+      q = pbuf_alloc(PBUF_RAW, p->tot_len, PBUF_RAM);
+      if (q != NULL) {
+          pbuf_copy(q, p);
+          //pbuf_free(p);
+      } else {
+          LWIP_ASSERT("q != NULL", q != NULL);
+      }
+
+      netif->linkoutput(netif, q);
+      pbuf_free(q);
+}
+#else
       /* return ARP reply */
       netif->linkoutput(netif, p);
+#endif
     /* we are not configured? */
     } else if (ip_addr_isany(&netif->ip_addr)) {
       /* { for_us == 0 and netif->ip_addr.addr == 0 } */
