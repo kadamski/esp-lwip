@@ -600,7 +600,12 @@ pbuf_header(struct pbuf *p, s16_t header_size_increment)
     } else {
       /* cannot expand payload to front (yet!)
        * bail out unsuccesfully */
-      return 1;
+      if (type == PBUF_REF) {
+         /* increase payload pointer */
+        p->payload = (u8_t *)p->payload - header_size_increment;
+      } else {
+        return 1;
+      }
     }
   } else {
     /* Unknown type */
