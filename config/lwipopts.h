@@ -38,10 +38,18 @@ static inline uint32_t sys_now(void)
 }
 
 // For espconn:
+#ifndef os_malloc
 #define os_malloc(s)                        pvPortMalloc((s))
+#endif
+#ifndef os_realloc
 #define os_realloc(p, s)                    pvPortRealloc((p), (s))
+#endif
+#ifndef os_zalloc
 #define os_zalloc(s)                        pvPortZalloc((s))
+#endif
+#ifndef os_free
 #define os_free(p)                          vPortFree((p))
+#endif
 
 // Required:
 #define LWIP_DHCP                           1
