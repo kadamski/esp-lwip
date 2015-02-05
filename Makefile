@@ -48,12 +48,16 @@ espressif/sys_arch.o \
 espressif/netio.o \
 espressif/dhcpserver.o \
 
+.PHONY: all
+
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 	$(OBJCOPY) --rename-section .text=.irom0.text --rename-section .literal=.irom0.literal $@
+
+all: liblwip.a ours/eagle_lwip_if.o
 
 liblwip.a: $(OBJS)
 	$(AR) rcs liblwip.a $(OBJS)
 
 clean:
-	rm $(OBJS) liblwip.a
+	rm $(OBJS) liblwip.a ours/eagle_lwip_if.o
