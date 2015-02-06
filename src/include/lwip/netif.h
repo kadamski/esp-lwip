@@ -178,10 +178,6 @@ struct netif {
   /** the AutoIP client state information for this netif */
   struct autoip *autoip;
 #endif
-#if LWIP_NETIF_HOSTNAME
-  /* the hostname for this netif, NULL is a valid value */
-  char*  hostname;
-#endif /* LWIP_NETIF_HOSTNAME */
   /** maximum transfer unit (in bytes) */
   u16_t mtu;
   /** number of bytes used in hwaddr */
@@ -227,6 +223,10 @@ struct netif {
   u16_t loop_cnt_current;
 #endif /* LWIP_LOOPBACK_MAX_PBUFS */
 #endif /* ENABLE_LOOPBACK */
+#if LWIP_NETIF_HOSTNAME
+  /* the hostname for this netif, NULL is a valid value */
+  char*  hostname;
+#endif /* LWIP_NETIF_HOSTNAME */
 };
 
 #if LWIP_SNMP

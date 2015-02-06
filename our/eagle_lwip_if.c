@@ -91,6 +91,14 @@ eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], ip_addr_t *ips)
     queue = (void *) os_malloc(sizeof(struct ETSEventTag) * QUEUE_LEN);
 
     if (state->dhcps_if == 0) {
+#if LWIP_NETIF_HOSTNAME
+#ifdef LWIP_NETIF_HOSTNAME_PREFIX
+        myif->hostname = os_malloc(sizeof(LWIP_NETIF_HOSTNAME_PREFIX)+10);
+        os_sprintf(myif->hostname, "%s%02x%02x%02x", LWIP_NETIF_HOSTNAME_PREFIX,
+                myif->hwaddr[3], myif->hwaddr[4], myif->hwaddr[5]);
+#endif
+#endif
+
         ets_task(task_if0, TASK_IF0_PRIO, queue, QUEUE_LEN);
     } else {
         netif_set_addr(myif, &ipaddr, &netmask, &gw);
