@@ -78,7 +78,7 @@ eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], ip_addr_t *ips)
     ip_addr_t gw = ips[2];
 
     if (state->myif == NULL) {
-        myif = pvPortZalloc(sizeof(struct netif));
+        myif = (void *)os_zalloc(sizeof(struct netif));
     }
 
     myif->state = state;
@@ -88,7 +88,7 @@ eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], ip_addr_t *ips)
     myif->output = etharp_output;
     ets_memcpy(myif->hwaddr, hw, 6);
 
-    queue = pvPortMalloc(sizeof(struct ETSEventTag) * QUEUE_LEN);
+    queue = (void *) os_malloc(sizeof(struct ETSEventTag) * QUEUE_LEN);
 
     if (state->dhcps_if == 0) {
         ets_task(task_if0, TASK_IF0_PRIO, queue, QUEUE_LEN);
