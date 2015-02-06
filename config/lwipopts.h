@@ -49,8 +49,8 @@ static inline uint32_t sys_now(void)
 
 // Optional:
 #define LWIP_IGMP                           1
-#define LWIP_NETIF_LOOPBACK                 1
-#define LWIP_HAVE_LOOPIF                    1
+#define LWIP_NETIF_LOOPBACK                 0
+#define LWIP_HAVE_LOOPIF                    0
 
 // Tweakable:
 #define ESP_TIMEWAIT_THRESHOLD              10000
