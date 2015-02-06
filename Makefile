@@ -54,10 +54,10 @@ espressif/dhcpserver.o \
 	$(CC) -c $(CFLAGS) -o $@ $<
 	$(OBJCOPY) --rename-section .text=.irom0.text --rename-section .literal=.irom0.literal $@
 
-all: liblwip.a ours/eagle_lwip_if.o
+all: liblwip.a our/eagle_lwip_if.o
 
 liblwip.a: $(OBJS)
 	$(AR) rcs liblwip.a $(OBJS)
 
 clean:
-	rm $(OBJS) liblwip.a ours/eagle_lwip_if.o
+	rm $(OBJS) liblwip.a our/eagle_lwip_if.o
