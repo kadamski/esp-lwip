@@ -78,7 +78,7 @@ eagle_lwip_if_alloc(struct myif_state *state, u8_t hw[6], ip_addr_t *ips)
     ip_addr_t gw = ips[2];
 
     if (state->myif == NULL) {
-        myif = pvPortMalloc(sizeof(struct netif));
+        myif = pvPortZalloc(sizeof(struct netif));
     }
 
     myif->state = state;
