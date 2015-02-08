@@ -47,6 +47,7 @@ espressif/espconn_udp.o \
 espressif/sys_arch.o \
 espressif/netio.o \
 espressif/dhcpserver.o \
+espressif/ping.o \
 
 .PHONY: all
 
