@@ -132,6 +132,8 @@ typedef struct _espconn_msg{
 	void *preverse;
 	void *pssl;
 	struct _espconn_msg *pnext;
+	uint8_t hold;
+	uint16_t hold_len;
 }espconn_msg;
 
 /******************************************************************************

@@ -291,7 +291,11 @@ espconn_client_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
 	tcp_arg(pcb, arg);
 
     if (p != NULL) {
-        tcp_recved(pcb, p ->tot_len);
+	if (precv_cb->hold == 0) {
+	    tcp_recved(pcb, p->tot_len);
+	} else {
+	    precv_cb->hold_len += p->tot_len;
+	}
     }
 
     if (err == ERR_OK && p != NULL) {
@@ -605,8 +609,13 @@ espconn_server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
 
     tcp_arg(pcb, arg);
     espconn_printf("server has application data received: %d\n", system_get_free_heap_size());
+
     if (p != NULL) {
-        tcp_recved(pcb, p->tot_len);
+	if (precv_cb->hold == 0) {
+	    tcp_recved(pcb, p->tot_len);
+	} else {
+	    precv_cb->hold_len += p->tot_len;
+	}
     }
 
     if (err == ERR_OK && p != NULL) {
@@ -949,3 +958,49 @@ sint8 ICACHE_FLASH_ATTR espconn_tcp_delete(struct espconn *pdeletecon)
 	}
 }
 
+int8_t espconn_recv_hold(struct espconn *pespconn)
+{
+    espconn_msg *pnode = NULL;
+    bool ret;
+
+    if (pespconn == NULL) {
+        return ESPCONN_ARG;
+    }
+
+    ret = espconn_find_connection(pespconn, &pnode);
+    if (ret != true) {
+        os_printf("RecvHold, By pespconn,findconn_msg fail\n");
+        return ESPCONN_ARG;
+    }
+
+    if (pnode->hold == 0) {
+        pnode->hold = 1;
+        pnode->hold_len = 0;
+    }
+
+    return 0;
+}
+
+int8_t espconn_recv_unhold(struct espconn *pespconn)
+{
+    espconn_msg *pnode = NULL;
+    bool ret;
+
+    if (pespconn == NULL) {
+        return ESPCONN_ARG;
+    }
+
+    ret = espconn_find_connection(pespconn, &pnode);
+    if (ret != true) {
+        os_printf("RecvHold, By pespconn,findconn_msg fail\n");
+        return ESPCONN_ARG;
+    }
+
+    if (pnode->hold == 1) {
+        tcp_recved(pnode->pcommon.pcb, pnode->hold_len);
+        pnode->hold = 0;
+        pnode->hold_len = 0;
+    }
+
+    return 0;
+}
