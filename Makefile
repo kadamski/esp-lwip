@@ -1,13 +1,23 @@
 CC = xtensa-lx106-elf-gcc
 AR = xtensa-lx106-elf-ar
 OBJCOPY = xtensa-lx106-elf-objcopy
+CFLAGS = -Isrc/include/ -Isrc/include/ipv4/ -Iconfig/ -Iespressif/include/
 
-CFLAGS = -Os -mlongcalls -Isrc/include/ -Isrc/include/ipv4/ -Iconfig/ -Iespressif/include/
+include ./Makefile-local.mk
 
-CFLAGS += -DLWIP_OPEN_SRC
-CFLAGS += -D__ets__
+CFLAGS += -Os -g -mlongcalls -DLWIP_OPEN_SRC -D__ets__
 
-OBJS = \
+ifneq ($(LIBMAIN_PATH),)
+    ADDITIONAL_TARGETS += replace_libmain
+    CFLAGS += -DLWIP_OUR_LWIP_IF
+else
+    ifeq ($(USE_OUR_LWIP_IF),1)
+	OBJS += our/eagle_lwip_if.o
+	CFLAGS += -DLWIP_OUR_IF
+    endif
+endif
+
+OBJS += \
 src/api/api_lib.o \
 src/api/api_msg.o \
 src/api/err.o \
@@ -49,16 +59,19 @@ espressif/netio.o \
 espressif/dhcpserver.o \
 espressif/ping.o \
 
-.PHONY: all
+.PHONY: all clean replace_libmain
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 	$(OBJCOPY) --rename-section .text=.irom0.text --rename-section .literal=.irom0.literal $@
 
-all: liblwip.a our/eagle_lwip_if.o
+all: liblwip.a $(ADDITIONAL_TARGETS)
 
 liblwip.a: $(OBJS)
 	$(AR) rcs liblwip.a $(OBJS)
 
+replace_libmain: our/eagle_lwip_if.o
+	$(AR) rs $(LIBMAIN_PATH) $^
+
 clean:
-	rm $(OBJS) liblwip.a our/eagle_lwip_if.o
+	rm -f $(OBJS) liblwip.a our/eagle_lwip_if.o

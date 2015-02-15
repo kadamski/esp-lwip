@@ -78,8 +78,10 @@ static inline uint32_t sys_now(void)
 #define LWIP_TCP_KEEPALIVE                  1
 #define LWIP_STATS                          0
 
-#define LWIP_NETIF_HOSTNAME                 0 // our eagle_lwip_if.o required
-#define LWIP_NETIF_HOSTNAME_PREFIX          "esp8266-"
+#ifdef LWIP_OUR_IF
+  #define LWIP_NETIF_HOSTNAME               1 // our eagle_lwip_if.o required
+  #define LWIP_NETIF_HOSTNAME_PREFIX        "esp8266-"
+#endif
 
 // #define LWIP_DEBUG
 // #define IP_DEBUG                            LWIP_DBG_ON

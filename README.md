@@ -67,8 +67,19 @@ fields to `netif` structure, changing its size and breaking SDK
 compatibility (Espressif version of `eagle_lwip_if.o` is compiled with
 their version of netif struct and will always allocate 56 bytes for it).
 
+If you want to use it, you have to modify your `libmain.a` and either
+remove `eagle_lwip_if.o` from it and add our own version to `liblwip.a`
+(see `USE_OUR_LWIP_IF` in `Makefile-local.mk`) or replace it with our
+own version (see `LIBMAIN_PATH` in `Makefile-local.mk`).
+
 Note that using or version of this module is not enough to freely change
 `netif` structure. It seems that it's used by some other parts of SDK
 too so we have to ensure that all the fields used by SDK are on expected
 offsets. We can freely add new fields at the end of this structure,
 though.
+
+## Makefile-local.mk
+
+Use this file to create all the local modifications required to compile
+this library in your environment. There are also some options you can
+set there, see inline comments.
