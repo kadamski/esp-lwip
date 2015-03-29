@@ -17,6 +17,10 @@ else
     endif
 endif
 
+ifneq ($(ESPCONN_FAKE_INIT),0)
+    CFLAGS += -DESPCONN_FAKE_INIT
+endif
+
 OBJS += \
 src/api/api_lib.o \
 src/api/api_msg.o \

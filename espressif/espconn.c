@@ -717,3 +717,9 @@ espconn_gethostbyname(struct espconn *pespconn, const char *hostname, ip_addr_t 
     return dns_gethostbyname(hostname, addr, found, pespconn);
 }
 
+#ifdef ESPCONN_FAKE_INIT
+uint32 ICACHE_FLASH_ATTR espconn_init(uint32 arg)
+{
+    return 1;
+}
+#endif
