@@ -353,7 +353,7 @@ sys_untimeout(sys_timeout_handler handler, void *arg)
 }
 
 #if NO_SYS
-
+extern uint8 timer2_ms_flag;
 /** Handle timeouts for NO_SYS==1 (i.e. without using
  * tcpip_thread/sys_timeouts_mbox_fetch(). Uses sys_now() to call timeout
  * handler functions when timeouts expire.
@@ -363,25 +363,26 @@ sys_untimeout(sys_timeout_handler handler, void *arg)
 void
 sys_check_timeouts(void)
 {
-  if (next_timeout) {
-    struct sys_timeo *tmptimeout;
-    u32_t diff;
-    sys_timeout_handler handler;
-    void *arg;
-    u8_t had_one;
-    u32_t now;
+  struct sys_timeo *tmptimeout;
+  u32_t diff;
+  sys_timeout_handler handler;
+  void *arg;
+  int had_one;
+  u32_t now;
 
-    now = sys_now();
+  now = NOW();
+  if (next_timeout) {
     /* this cares for wraparounds */
-    diff = now - timeouts_last_time;
+	if (timer2_ms_flag == 0) {
+		diff = LWIP_U32_DIFF(now, timeouts_last_time)/((CPU_CLK_FREQ>>4)/1000);
+	} else {
+		diff = LWIP_U32_DIFF(now, timeouts_last_time)/((CPU_CLK_FREQ>>8)/1000);
+	}
     do
     {
-#if PBUF_POOL_FREE_OOSEQ
-      PBUF_CHECK_FREE_OOSEQ();
-#endif /* PBUF_POOL_FREE_OOSEQ */
       had_one = 0;
       tmptimeout = next_timeout;
-      if (tmptimeout && (tmptimeout->time <= diff)) {
+      if (tmptimeout->time <= diff) {
         /* timeout has expired */
         had_one = 1;
         timeouts_last_time = now;

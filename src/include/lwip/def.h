@@ -115,6 +115,10 @@ u32_t lwip_ntohl(u32_t x);
 
 #endif /* BYTE_ORDER == BIG_ENDIAN */
 
+/** Get the absolute difference between 2 u32_t values (correcting overflows)
+ * 'a' is expected to be 'higher' (without overflow) than 'b'. */
+#define LWIP_U32_DIFF(a, b) (((a) >= (b)) ? ((a) - (b)) : (((a) + ((b) ^ 0xFFFFFFFF) + 1)))
+
 #ifdef __cplusplus
 }
 #endif
