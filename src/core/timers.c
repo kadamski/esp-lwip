@@ -250,7 +250,7 @@ void sys_timeouts_init(void)
 
 #if NO_SYS
   /* Initialise timestamp for sys_check_timeouts */
-  timeouts_last_time = sys_now();
+  timeouts_last_time = NOW();
 #endif
 }
 
@@ -354,6 +354,8 @@ sys_untimeout(sys_timeout_handler handler, void *arg)
 
 #if NO_SYS
 
+extern uint8 timer2_ms_flag;
+
 /** Handle timeouts for NO_SYS==1 (i.e. without using
  * tcpip_thread/sys_timeouts_mbox_fetch(). Uses sys_now() to call timeout
  * handler functions when timeouts expire.
@@ -371,9 +373,10 @@ sys_check_timeouts(void)
     u8_t had_one;
     u32_t now;
 
-    now = sys_now();
+    now = NOW();
     /* this cares for wraparounds */
     diff = now - timeouts_last_time;
+    diff /= (CPU_CLK_FREQ >> (timer2_ms_flag ? 8 : 4)/1000);
     do
     {
 #if PBUF_POOL_FREE_OOSEQ
@@ -413,7 +416,7 @@ sys_check_timeouts(void)
 void
 sys_restart_timeouts(void)
 {
-  timeouts_last_time = sys_now();
+  timeouts_last_time = NOW();
 }
 
 #else /* NO_SYS */
