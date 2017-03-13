@@ -91,15 +91,15 @@ typedef unsigned long   mem_ptr_t;
 #define LWIP_PLATFORM_HTONS(_n)  ((u16_t)((((_n) & 0xff) << 8) | (((_n) >> 8) & 0xff)))
 #define LWIP_PLATFORM_HTONL(_n)  ((u32_t)( (((_n) & 0xff) << 24) | (((_n) & 0xff00) << 8) | (((_n) >> 8)  & 0xff00) | (((_n) >> 24) & 0xff) ))
 
-#if LWIP_RAW
+#ifdef LWIP_RAW
 extern u8_t memp_memory_RAW_PCB_base[];
 #endif /* LWIP_RAW */
 
-#if LWIP_UDP
+#ifdef LWIP_UDP
 extern u8_t memp_memory_UDP_PCB_base[];
 #endif /* LWIP_UDP */
 
-#if LWIP_TCP
+#ifdef LWIP_TCP
 extern u8_t memp_memory_TCP_PCB_base[];
 extern u8_t memp_memory_TCP_PCB_LISTEN_base[];
 extern u8_t memp_memory_TCP_SEG_base[] SHMEM_ATTR;
